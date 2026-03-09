@@ -16,3 +16,10 @@ jobs:
           go-version: '1.22'
       - run: go build ./... || true
       - run: go test ./... || true
+
+      - name: Build cache service image
+        run: |
+          docker build \
+            -f ./image-other/Dockerfile \
+            -t cache-service:${{ github.sha }} \
+            image-other
