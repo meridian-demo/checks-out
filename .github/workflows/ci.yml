@@ -16,3 +16,24 @@ jobs:
           go-version: '1.22'
       - run: go build ./... || true
       - run: go test ./... || true
+
+  snyk:
+    runs-on: meridian
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Snyk CLI
+        run: |
+          curl -sSL https://static.snyk.io/cli/latest/snyk-linux -o /usr/local/bin/snyk
+          chmod +x /usr/local/bin/snyk
+      - name: Snyk Code Test
+        run: snyk code test --json --json-file-output=snyk-code-results.json || true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Snyk Open Source Test
+        run: snyk test --json --json-file-output=snyk-oss-results.json || true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Snyk IaC Test
+        run: snyk iac test --json --json-file-output=snyk-iac-results.json || true
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}

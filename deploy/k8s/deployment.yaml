@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: checks-out
+  namespace: checks-out
+  labels:
+    app: checks-out
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: checks-out
+  template:
+    metadata:
+      labels:
+        app: checks-out
+    spec:
+      containers:
+        - name: checks-out
+          image: checks-out:latest
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_DRIVER
+              value: "mysql"
+            - name: DATABASE_CONFIG
+              valueFrom:
+                secretKeyRef:
+                  name: checks-out-db
+                  key: connection-string
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
